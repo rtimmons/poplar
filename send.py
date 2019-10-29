@@ -1,16 +1,11 @@
-from collections import namedtuple
-
-import client.metrics_pb2_grpc as metrics
 import client.recorder_pb2_grpc as recorder
 import client.recorder_pb2 as recorder2
 import client.poplar_pb2 as poplar
 
-import google.protobuf.duration_pb2 as gduration
-import google.protobuf.json_format as js
-
 import collections
 
 import grpc
+import bson
 
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
@@ -78,10 +73,29 @@ def send_event(collector, poplar_id, event):
     assert response.status
 
 
+def write_event(event):
+    data = bson.encode_array([
+        # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
+        event.TotalSeconds,
+        event.TotalNanos,
+        event.Seconds,
+        event.Nanos,
+        event.Size,
+        event.Ops
+    ], [])
+    print(data)
+
+
 def main():
+    event = Event(0, 150, 0, 100, 500, 1)
+    write_event(event)
+
+
+def poplar_main():
     collector, poplar_id = create_collector()
     # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
-    send_event(collector, poplar_id, Event(0, 150, 0, 100, 500, 1))
+    event = Event(0, 150, 0, 100, 500, 1)
+    send_event(collector, poplar_id, event)
     end_collector(collector, poplar_id)
 
 
