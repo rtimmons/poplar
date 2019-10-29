@@ -2,6 +2,8 @@ import client.recorder_pb2_grpc as recorder
 import client.recorder_pb2 as recorder2
 import client.poplar_pb2 as poplar
 
+import google.protobuf.json_format as f
+
 import collections
 
 import grpc
@@ -69,7 +71,7 @@ def send_event(collector, poplar_id, event):
     response = collector.IncIterations(send_int)
     assert response.status
 
-    response = collector.EndEvent(poplar_id)
+    response = collector.EndEvent(duration)
     assert response.status
 
 
@@ -86,12 +88,12 @@ def write_event(event):
     print(data)
 
 
-def main():
+def bson_main():
     event = Event(0, 150, 0, 100, 500, 1)
     write_event(event)
 
 
-def poplar_main():
+def main():
     collector, poplar_id = create_collector()
     # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
     event = Event(0, 150, 0, 100, 500, 1)
