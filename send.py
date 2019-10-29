@@ -14,7 +14,7 @@ from datetime import datetime
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
-HOW_MANY_EVENTS = 100 * 1000
+HOW_MANY_EVENTS = 1000 * 1000 * 10
 ALL_FIELDS = True
 
 
@@ -30,8 +30,8 @@ def create_collector():
     options.dynamic = False
     options.recorder = poplar.CreateOptions.RecorderType.PERF
 
-    response = collector.CreateRecorder(options)
-    assert response.status
+    # response = collector.CreateRecorder(options)
+    # assert response.status
 
     poplar_id = poplar.PoplarID()
     poplar_id.name = NAME
@@ -94,6 +94,7 @@ def random_events():
 
 
 def write_event(output, event):
+    print(event)
     data = bson.encode_array([
         # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
         event.TotalSeconds,
@@ -106,8 +107,21 @@ def write_event(output, event):
     output.write(data)
 
 
+def bson_encoded_main():
+    data = bson.encode_array([
+        Event(TotalSeconds=3, TotalNanos=209, Seconds=3, Nanos=422, Size=157, Ops=0)
+    ], [])
+    start = datetime.now()
+    with open('t1', 'wb+') as output:
+        for _ in range(HOW_MANY_EVENTS):
+            output.write(data)
+    end = datetime.now()
+    print("Took %i seconds for bson_encoded to write %i events" % ((end - start).seconds, HOW_MANY_EVENTS))
+
+
 def bson_main():
     events = random_events()
+    print(events[0])
     start = datetime.now()
     with open('t1', 'wb+') as output:
         for event in events:
@@ -129,5 +143,6 @@ def poplar_main():
 
 
 if __name__ == '__main__':
+    bson_encoded_main()
     # bson_main()
-    poplar_main()
+    # poplar_main()
