@@ -9,6 +9,7 @@ import collections
 import grpc
 import bson
 import random
+from datetime import datetime
 
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
@@ -75,7 +76,7 @@ def send_event(collector, poplar_id, event):
     assert response.status
 
 
-HOW_MANY_EVENTS = 100 * 1000
+HOW_MANY_EVENTS = 1000 * 10002
 
 
 def random_events():
@@ -106,18 +107,25 @@ def write_event(output, event):
 
 
 def bson_main():
+    start = datetime.now()
     with open('t1', 'wb+') as output:
         for event in random_events():
             write_event(output, event)
+    end = datetime.now()
+    print("Took %i seconds for bson to write %i events" % ((end - start).total_seconds(), HOW_MANY_EVENTS))
 
 
 def poplar_main():
     collector, poplar_id = create_collector()
     # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
+    start = datetime.now()
     for event in random_events():
         send_event(collector, poplar_id, event)
+    end = datetime.now()
     end_collector(collector, poplar_id)
+    print("Took %i seconds for poplar to write %i events" % ((end - start).total_seconds(), HOW_MANY_EVENTS))
 
 
 if __name__ == '__main__':
+    bson_main()
     poplar_main()
