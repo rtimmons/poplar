@@ -8,6 +8,7 @@ import collections
 
 import grpc
 import bson
+import random
 
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
@@ -41,7 +42,6 @@ def end_collector(collector, poplar_id):
 
 
 def send_event(collector, poplar_id, event):
-
     response = collector.BeginEvent(poplar_id)
     assert response.status
 
@@ -75,7 +75,24 @@ def send_event(collector, poplar_id, event):
     assert response.status
 
 
-def write_event(event):
+HOW_MANY_EVENTS = 100 * 1000
+
+
+def random_events():
+    random.seed(1000)
+
+    def random_event():
+        return Event(random.randint(0, 5),
+                     random.randint(0, 1000),
+                     random.randint(0, 5),
+                     random.randint(0, 1000),
+                     random.randint(0, 500),
+                     random.choice([0, 1]))
+
+    return [random_event() for _ in range(HOW_MANY_EVENTS)]
+
+
+def write_event(output, event):
     data = bson.encode_array([
         # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
         event.TotalSeconds,
@@ -85,21 +102,22 @@ def write_event(event):
         event.Size,
         event.Ops
     ], [])
-    print(data)
+    output.write(data)
 
 
 def bson_main():
-    event = Event(0, 150, 0, 100, 500, 1)
-    write_event(event)
+    with open('t1', 'wb+') as output:
+        for event in random_events():
+            write_event(output, event)
 
 
-def main():
+def poplar_main():
     collector, poplar_id = create_collector()
     # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
-    event = Event(0, 150, 0, 100, 500, 1)
-    send_event(collector, poplar_id, event)
+    for event in random_events():
+        send_event(collector, poplar_id, event)
     end_collector(collector, poplar_id)
 
 
 if __name__ == '__main__':
-    main()
+    poplar_main()
