@@ -14,6 +14,8 @@ from datetime import datetime
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
+HOW_MANY_EVENTS = 100 * 1000
+ALL_FIELDS = True
 
 
 def create_collector():
@@ -51,32 +53,30 @@ def send_event(collector, poplar_id, event):
     duration.duration.nanos = 23434  # event.Nanos
     duration.name = NAME
 
-    response = collector.SetDuration(duration)
-    assert response.status
+    if ALL_FIELDS:
+        response = collector.SetDuration(duration)
+        assert response.status
 
-    duration = recorder2.EventSendDuration()
-    duration.duration.seconds = 1  # event.TotalSeconds
-    duration.duration.nanos = 23434  # event.TotalNanos
-    duration.name = NAME
+        duration = recorder2.EventSendDuration()
+        duration.duration.seconds = 1  # event.TotalSeconds
+        duration.duration.nanos = 23434  # event.TotalNanos
+        duration.name = NAME
 
-    response = collector.SetTotalDuration(duration)
-    assert response.status
+        response = collector.SetTotalDuration(duration)
+        assert response.status
 
-    send_int = recorder2.EventSendInt()
-    send_int.name = NAME
-    send_int.value = 500  # event.Size
-    response = collector.IncSize(send_int)
-    assert response.status
+        send_int = recorder2.EventSendInt()
+        send_int.name = NAME
+        send_int.value = 500  # event.Size
+        response = collector.IncSize(send_int)
+        assert response.status
 
-    send_int.value = 1  # event.Ops
-    response = collector.IncIterations(send_int)
-    assert response.status
+        send_int.value = 1  # event.Ops
+        response = collector.IncIterations(send_int)
+        assert response.status
 
     response = collector.EndEvent(duration)
     assert response.status
-
-
-HOW_MANY_EVENTS = 1000 * 10002
 
 
 def random_events():
@@ -107,9 +107,10 @@ def write_event(output, event):
 
 
 def bson_main():
+    events = random_events()
     start = datetime.now()
     with open('t1', 'wb+') as output:
-        for event in random_events():
+        for event in events:
             write_event(output, event)
     end = datetime.now()
     print("Took %i seconds for bson to write %i events" % ((end - start).total_seconds(), HOW_MANY_EVENTS))
@@ -118,8 +119,9 @@ def bson_main():
 def poplar_main():
     collector, poplar_id = create_collector()
     # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
+    events = random_events()
     start = datetime.now()
-    for event in random_events():
+    for event in events:
         send_event(collector, poplar_id, event)
     end = datetime.now()
     end_collector(collector, poplar_id)
@@ -127,5 +129,5 @@ def poplar_main():
 
 
 if __name__ == '__main__':
-    bson_main()
+    # bson_main()
     poplar_main()
