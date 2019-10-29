@@ -5,15 +5,11 @@ import grpc_tools.protoc
 import grpc
 
 # pylint: disable=too-many-instance-attributes,too-many-statements,too-many-locals
-def run_protoc():
+def run_protoc(fname):
     """Start up the jasper process manager."""
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    proto_file = os.path.join(root_dir,  "recorder.proto")
-    try:
-        well_known_protos_include = pkg_resources.resource_filename("grpc_tools", "_proto")
-    except ImportError:
-        raise ImportError("You must run: sys.executable + '-m pip install grpcio grpcio-tools "
-                          "googleapis-common-protos' to use --spawnUsing=jasper.")
+    proto_file = os.path.join(root_dir, fname)
+    well_known_protos_include = pkg_resources.resource_filename("grpc_tools", "_proto")
 
     # We use the build/ directory as the output directory because the generated files aren't
     # meant to because tracked by git or linted.
@@ -40,7 +36,11 @@ def run_protoc():
         os.path.basename(proto_file),
     ])
 
-    if ret != 0:
-        raise RuntimeError("Failed to generated gRPC files from the jasper.proto file")
+def main():
+    run_protoc("poplar.proto")
+    run_protoc("recorder.proto")
+    run_protoc("metrics.proto")
 
-run_protoc()
+
+if __name__ == '__main__':
+    main()
