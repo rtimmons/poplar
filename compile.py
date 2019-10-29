@@ -8,7 +8,7 @@ import grpc
 def run_protoc():
     """Start up the jasper process manager."""
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    proto_file = os.path.join(root_dir,  "metrics.proto")
+    proto_file = os.path.join(root_dir,  "recorder.proto")
     try:
         well_known_protos_include = pkg_resources.resource_filename("grpc_tools", "_proto")
     except ImportError:
@@ -20,7 +20,7 @@ def run_protoc():
     proto_out = os.path.join(root_dir, "client")
 
     # utils.rmtree(proto_out, ignore_errors=True)
-    os.makedirs(proto_out)
+    # os.makedirs(proto_out)
 
     # We make 'proto_out' into a Python package so we can add it to 'sys.path' and import the
     # *pb2*.py modules from it.
