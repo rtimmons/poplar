@@ -14,7 +14,7 @@ from datetime import datetime
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
-HOW_MANY_EVENTS = 10 * 1000
+HOW_MANY_EVENTS = 100 * 1000
 ALL_FIELDS = True
 
 
@@ -25,7 +25,7 @@ def create_collector():
     options = poplar.CreateOptions()
     options.name = NAME
     options.path = "t1"
-    options.chunkSize = 10
+    options.chunkSize = 10000
     options.streaming = True
     options.dynamic = False
     options.recorder = poplar.CreateOptions.RecorderType.PERF
@@ -64,6 +64,12 @@ def to_metrics_event(event):
     metrics.counters.size = 20
     metrics.counters.ops = 1
     metrics.counters.number = 1
+
+    # what is guages.state?
+    metrics.gauges.state = 1
+    # threads don't know this value
+    metrics.gauges.workers = 1
+    metrics.gauges.failed = 0
 
     return metrics
 
