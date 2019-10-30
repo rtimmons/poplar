@@ -9,12 +9,14 @@ import collections
 import grpc
 import bson
 import random
+import threading
 from datetime import datetime
 
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
-HOW_MANY_EVENTS = 100 * 1000
+THREADS = 10
+HOW_MANY_EVENTS = 100 * 1000 / THREADS
 ALL_FIELDS = True
 
 
@@ -127,6 +129,23 @@ def bson_main():
 
 def poplar_main():
     collector, poplar_id = create_collector()
+    threads = []
+    start = datetime.now()
+    for _ in range(THREADS):
+        thread = threading.Thread(target=run_poplar_main_thread, args=(collector, poplar_id))
+        threads.append(thread)
+        thread.run()
+    for thread in threads:
+        try:
+            thread.join()
+        except Exception as e:
+            pass
+    end = datetime.now()
+    print("Took %i seconds for %i threads to write %i events" % ((end - start).total_seconds(), THREADS, HOW_MANY_EVENTS * THREADS))
+    end_collector(collector, poplar_id)
+
+
+def run_poplar_main_thread(collector, poplar_id):
     events = random_events()
     start = datetime.now()
     for event in events:
@@ -136,7 +155,6 @@ def poplar_main():
         response = collector.SendEvent(to_metrics_event(event))
         assert response.status
     end = datetime.now()
-    end_collector(collector, poplar_id)
     print("Took %i seconds for poplar to write %i events" % ((end - start).total_seconds(), HOW_MANY_EVENTS))
 
 
