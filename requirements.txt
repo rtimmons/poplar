@@ -1,0 +1,9 @@
+bson==0.5.8
+enum34==1.1.6
+futures==3.3.0
+googleapis-common-protos==1.6.0
+grpcio==1.24.3
+grpcio-tools==1.24.3
+protobuf==3.10.0
+python-dateutil==2.8.0
+six==1.12.0
