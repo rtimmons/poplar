@@ -1,5 +1,5 @@
-import client.recorder_pb2_grpc as recorder
-import client.recorder_pb2 as recorder2
+import client.collector_pb2_grpc as pcollector
+import client.collector_pb2 as collector_model
 import client.poplar_pb2 as poplar
 
 import google.protobuf.json_format as f
@@ -14,13 +14,13 @@ from datetime import datetime
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
-HOW_MANY_EVENTS = 1000 * 1000 * 10
+HOW_MANY_EVENTS = 10 * 1000
 ALL_FIELDS = True
 
 
 def create_collector():
     channel = grpc.insecure_channel('localhost:2288')
-    collector = recorder.PoplarMetricsRecorderStub(channel)
+    collector = pcollector.PoplarEventCollectorStub(channel)
 
     options = poplar.CreateOptions()
     options.name = NAME
@@ -30,8 +30,13 @@ def create_collector():
     options.dynamic = False
     options.recorder = poplar.CreateOptions.RecorderType.PERF
 
-    # response = collector.CreateRecorder(options)
-    # assert response.status
+    try:
+        response = collector.CreateCollector(options)
+        assert response.status
+    except Exception as e:
+        # if we've already tried running this thing
+        print(e)
+        pass
 
     poplar_id = poplar.PoplarID()
     poplar_id.name = NAME
@@ -40,43 +45,27 @@ def create_collector():
 
 
 def end_collector(collector, poplar_id):
-    response = collector.CloseRecorder(poplar_id)
+    response = collector.CloseCollector(poplar_id)
     assert response.status
 
 
-def send_event(collector, poplar_id, event):
-    response = collector.BeginEvent(poplar_id)
-    assert response.status
+def to_metrics_event(event):
+    # convert Event namedtuple to EventMetrics (dummy/hard-coded numbers for now)
+    metrics = collector_model.EventMetrics()
+    metrics.name = NAME
+    metrics.time.seconds = 1572450055062
+    metrics.time.nanos = 247
 
-    duration = recorder2.EventSendDuration()
-    duration.duration.seconds = 1  # event.Seconds
-    duration.duration.nanos = 23434  # event.Nanos
-    duration.name = NAME
+    metrics.timers.total.seconds = 1
+    metrics.timers.total.nanos = 500
+    metrics.timers.duration.seconds = 0
+    metrics.timers.duration.nanos = 10000000
 
-    if ALL_FIELDS:
-        response = collector.SetDuration(duration)
-        assert response.status
+    metrics.counters.size = 20
+    metrics.counters.ops = 1
+    metrics.counters.number = 1
 
-        duration = recorder2.EventSendDuration()
-        duration.duration.seconds = 1  # event.TotalSeconds
-        duration.duration.nanos = 23434  # event.TotalNanos
-        duration.name = NAME
-
-        response = collector.SetTotalDuration(duration)
-        assert response.status
-
-        send_int = recorder2.EventSendInt()
-        send_int.name = NAME
-        send_int.value = 500  # event.Size
-        response = collector.IncSize(send_int)
-        assert response.status
-
-        send_int.value = 1  # event.Ops
-        response = collector.IncIterations(send_int)
-        assert response.status
-
-    response = collector.EndEvent(duration)
-    assert response.status
+    return metrics
 
 
 def random_events():
@@ -132,17 +121,20 @@ def bson_main():
 
 def poplar_main():
     collector, poplar_id = create_collector()
-    # ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops']
     events = random_events()
     start = datetime.now()
     for event in events:
-        send_event(collector, poplar_id, event)
+        # ideally would call
+        #     collector.StreamEvents([to_event(event) for event in events])
+        # but that doesn't work
+        response = collector.SendEvent(to_metrics_event(event))
+        assert response.status
     end = datetime.now()
     end_collector(collector, poplar_id)
     print("Took %i seconds for poplar to write %i events" % ((end - start).total_seconds(), HOW_MANY_EVENTS))
 
 
 if __name__ == '__main__':
-    bson_encoded_main()
+    # bson_encoded_main()
     # bson_main()
-    # poplar_main()
+    poplar_main()
