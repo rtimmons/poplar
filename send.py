@@ -145,13 +145,20 @@ def poplar_main():
     end_collector(collector, poplar_id)
 
 
+def stream(events):
+    for event in events:
+        yield to_metrics_event(event)
+
+
 def run_poplar_main_thread(collector, poplar_id):
     events = random_events()
     start = datetime.now()
+    # We "should" be able to call this:
+    #     sender = collector.StreamEvents(poplar_id)
+    #     sender.Send(stream(events))
+    # (see example: https://github.com/ridha/grpc-streaming-demo/blob/master/client.py)
+    # but it's not working
     for event in events:
-        # ideally would call
-        #     collector.StreamEvents([to_event(event) for event in events])
-        # but that doesn't work
         response = collector.SendEvent(to_metrics_event(event))
         assert response.status
     end = datetime.now()
