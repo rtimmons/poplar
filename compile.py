@@ -40,7 +40,7 @@ def main():
     run_protoc("poplar.proto")
     run_protoc("recorder.proto")
     run_protoc("metrics.proto")
-
+    run_protoc("collector.proto")
 
 if __name__ == '__main__':
     main()
