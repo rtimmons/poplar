@@ -15,8 +15,8 @@ from datetime import datetime
 Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds', 'Nanos', 'Size', 'Ops'])
 
 NAME = "InsertRemove.Insert"
-THREADS = 10
-HOW_MANY_EVENTS = 100 * 1000 / THREADS
+THREADS = 100
+HOW_MANY_EVENTS = 100 * 1000
 ALL_FIELDS = True
 
 
@@ -30,7 +30,7 @@ def create_collector():
     options.chunkSize = 10000
     options.streaming = True
     options.dynamic = False
-    options.recorder = poplar.CreateOptions.RecorderType.PERF
+    options.events = poplar.CreateOptions.EventsCollectorType.BASIC
 
     try:
         response = collector.CreateCollector(options)
@@ -38,7 +38,7 @@ def create_collector():
     except Exception as e:
         # if we've already tried running this thing
         print(e)
-        pass
+        raise e
 
     poplar_id = poplar.PoplarID()
     poplar_id.name = NAME
@@ -134,7 +134,7 @@ def poplar_main():
     for _ in range(THREADS):
         thread = threading.Thread(target=run_poplar_main_thread, args=(collector, poplar_id))
         threads.append(thread)
-        thread.run()
+        thread.start()
     for thread in threads:
         try:
             thread.join()

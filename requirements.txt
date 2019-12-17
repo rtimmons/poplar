@@ -1,6 +1,6 @@
 bson==0.5.8
 enum34==1.1.6
-futures==3.3.0
+futures
 googleapis-common-protos==1.6.0
 grpcio==1.24.3
 grpcio-tools==1.24.3
