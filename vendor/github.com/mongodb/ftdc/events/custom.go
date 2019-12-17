@@ -15,9 +15,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/mongodb/ftdc/bsonx"
+	"github.com/evergreen-ci/birch"
 	"github.com/pkg/errors"
-	mgobson "gopkg.in/mgo.v2/bson"
 )
 
 // CustomPoint represents a computed statistic as a key value
@@ -70,34 +69,10 @@ func (ps Custom) Swap(i, j int) { ps[i], ps[j] = ps[j], ps[i] }
 // array.
 func (ps Custom) Sort() { sort.Stable(ps) }
 
-func (ps Custom) MarshalBSON() ([]byte, error) {
-	ps.Sort()
-
-	doc := bsonx.DC.Make(ps.Len())
-
-	for _, elem := range ps {
-		doc.Append(bsonx.EC.Interface(elem.Name, elem.Value))
-	}
-
-	return doc.MarshalBSON()
-}
-
-func (ps Custom) GetBSON() (interface{}, error) {
-	ps.Sort()
-
-	doc := make(mgobson.D, 0, ps.Len())
-	for _, elem := range ps {
-		doc = append(doc, mgobson.DocElem{
-			Name:  elem.Name,
-			Value: elem.Value,
-		})
-	}
-
-	return doc, nil
-}
+func (ps Custom) MarshalBSON() ([]byte, error) { return birch.MarshalDocumentBSON(ps) }
 
 func (ps *Custom) UnmarshalBSON(in []byte) error {
-	doc, err := bsonx.ReadDocument(in)
+	doc, err := birch.ReadDocument(in)
 	if err != nil {
 		return errors.Wrap(err, "problem parsing bson document")
 	}
@@ -118,20 +93,18 @@ func (ps *Custom) UnmarshalBSON(in []byte) error {
 	return nil
 }
 
-func (ps *Custom) SetBSON(raw mgobson.Raw) error {
-	tmp := map[string]interface{}{}
-	if err := raw.Unmarshal(tmp); err != nil {
-		return errors.Wrap(err, "problem marshaling")
-	}
-
-	for k, v := range tmp {
-		*ps = append(*ps, CustomPoint{
-			Name:  k,
-			Value: v,
-		})
-	}
-
+func (ps Custom) MarshalDocument() (*birch.Document, error) {
 	ps.Sort()
 
-	return nil
+	doc := birch.DC.Make(ps.Len())
+
+	for _, elem := range ps {
+		de, err := birch.EC.InterfaceErr(elem.Name, elem.Value)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		doc.Append(de)
+	}
+
+	return doc, nil
 }

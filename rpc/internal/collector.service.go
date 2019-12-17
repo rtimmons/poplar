@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/evergreen-ci/poplar"
-	"github.com/mongodb/ftdc"
+	"github.com/mongodb/ftdc/events"
 	"github.com/mongodb/grip"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
@@ -41,49 +41,54 @@ func (s *collectorService) CloseCollector(ctx context.Context, id *PoplarID) (*P
 }
 
 func (s *collectorService) SendEvent(ctx context.Context, event *EventMetrics) (*PoplarResponse, error) {
-	collector, ok := s.registry.GetCollector(event.Name)
+	collector, ok := s.registry.GetEventsCollector(event.Name)
 
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "no registry named %s", event.Name)
 	}
 
-	collector.Add(event.Export().Document())
+	err := collector.AddEvent(event.Export())
 
-	return &PoplarResponse{Name: event.Name, Status: true}, nil
+	return &PoplarResponse{Name: event.Name, Status: err == nil}, nil
+
 }
 
 func (s *collectorService) StreamEvents(srv PoplarEventCollector_StreamEventsServer) error {
 	ctx := srv.Context()
 
-	var eventName string
-	var collector ftdc.Collector
+	var collector events.Collector
 
 	for {
 		event, err := srv.Recv()
-		if err != io.EOF {
+		if err == io.EOF {
 			return srv.SendAndClose(&PoplarResponse{
-				Name:   eventName,
+				Name:   event.Name,
 				Status: true,
 			})
+		} else if err != nil {
+			return srv.SendAndClose(&PoplarResponse{
+				Name:   event.Name,
+				Status: false,
+			})
 		}
-
-		if eventName == "" {
-			eventName = event.Name
-
-			var ok bool
-			collector, ok = s.registry.GetCollector(eventName)
-			if !ok {
-				return status.Errorf(codes.NotFound, "no registry named %s", eventName)
+		if collector == nil {
+			if event.Name == "" {
+				return status.Error(codes.InvalidArgument, "registries must be named")
 			}
 
-		} else if eventName != event.Name {
-			return status.Errorf(codes.InvalidArgument, "no registry named %s", eventName)
+			var ok bool
+			collector, ok = s.registry.GetEventsCollector(event.Name)
+			if !ok {
+				return status.Errorf(codes.NotFound, "no registry named %s", event.Name)
+			}
 		}
 
-		collector.Add(event.Export().Document())
+		if err := collector.AddEvent(event.Export()); err != nil {
+			return status.Errorf(codes.Internal, "problem persisting argument %s", err.Error())
+		}
 
 		if ctx.Err() != nil {
-			return status.Errorf(codes.Canceled, "operation canceled for %s", eventName)
+			return status.Errorf(codes.Canceled, "operation canceled for %s", event.Name)
 		}
 	}
 }
