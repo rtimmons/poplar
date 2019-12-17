@@ -13,8 +13,6 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
-from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -22,9 +20,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='poplar',
   syntax='proto3',
   serialized_options=_b('Z\010internal'),
-  serialized_pb=_b('\n\x0cpoplar.proto\x12\x06poplar\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"\x18\n\x08PoplarID\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xc7\x02\n\rCreateOptions\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\x12\x11\n\tchunkSize\x18\x03 \x01(\x05\x12\x11\n\tstreaming\x18\x04 \x01(\x08\x12\x0f\n\x07\x64ynamic\x18\x05 \x01(\x08\x12\x34\n\x08recorder\x18\x06 \x01(\x0e\x32\".poplar.CreateOptions.RecorderType\"\xac\x01\n\x0cRecorderType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04PERF\x10\x01\x12\x0f\n\x0bPERF_SINGLE\x10\x02\x12\x0e\n\nPERF_100MS\x10\x03\x12\x0b\n\x07PERF_1S\x10\x04\x12\x14\n\x10HISTOGRAM_SINGLE\x10\x06\x12\x13\n\x0fHISTOGRAM_100MS\x10\x07\x12\x10\n\x0cHISTOGRAM_1S\x10\x08\x12\x1a\n\x16INTERVAL_SUMMARIZATION\x10\t\".\n\x0ePoplarResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\x08\x42\nZ\x08internalb\x06proto3')
-  ,
-  dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,])
+  serialized_pb=_b('\n\x0cpoplar.proto\x12\x06poplar\"\x18\n\x08PoplarID\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x97\x05\n\rCreateOptions\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\x12\x11\n\tchunkSize\x18\x03 \x01(\x05\x12\x11\n\tstreaming\x18\x04 \x01(\x08\x12\x0f\n\x07\x64ynamic\x18\x05 \x01(\x08\x12\x34\n\x08recorder\x18\x06 \x01(\x0e\x32\".poplar.CreateOptions.RecorderType\x12\x39\n\x06\x65vents\x18\x07 \x01(\x0e\x32).poplar.CreateOptions.EventsCollectorType\x12\x10\n\x08\x62uffered\x18\x08 \x01(\x08\"\xb5\x01\n\x0cRecorderType\x12\x14\n\x10UNKNOWN_RECORDER\x10\x00\x12\x08\n\x04PERF\x10\x01\x12\x0f\n\x0bPERF_SINGLE\x10\x02\x12\x0e\n\nPERF_100MS\x10\x03\x12\x0b\n\x07PERF_1S\x10\x04\x12\x14\n\x10HISTOGRAM_SINGLE\x10\x06\x12\x13\n\x0fHISTOGRAM_100MS\x10\x07\x12\x10\n\x0cHISTOGRAM_1S\x10\x08\x12\x1a\n\x16INTERVAL_SUMMARIZATION\x10\t\"\xf7\x01\n\x13\x45ventsCollectorType\x12\x15\n\x11UNKNOWN_COLLECTOR\x10\x00\x12\t\n\x05\x42\x41SIC\x10\x01\x12\x0f\n\x0bPASSTHROUGH\x10\x02\x12\x10\n\x0cSAMPLING_100\x10\x03\x12\x0f\n\x0bSAMPLING_1K\x10\x04\x12\x10\n\x0cSAMPLING_10K\x10\x05\x12\x11\n\rSAMPLING_100K\x10\x06\x12\x14\n\x10RAND_SAMPLING_50\x10\x07\x12\x14\n\x10RAND_SAMPLING_25\x10\x08\x12\x14\n\x10RAND_SAMPLING_10\x10\t\x12\x12\n\x0eINTERVAL_100MS\x10\n\x12\x0f\n\x0bINTERVAL_1S\x10\x0b\".\n\x0ePoplarResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\x08\x42\nZ\x08internalb\x06proto3')
+)
 
 
 
@@ -35,7 +32,7 @@ _CREATEOPTIONS_RECORDERTYPE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='UNKNOWN', index=0, number=0,
+      name='UNKNOWN_RECORDER', index=0, number=0,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -73,10 +70,72 @@ _CREATEOPTIONS_RECORDERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=271,
-  serialized_end=443,
+  serialized_start=283,
+  serialized_end=464,
 )
 _sym_db.RegisterEnumDescriptor(_CREATEOPTIONS_RECORDERTYPE)
+
+_CREATEOPTIONS_EVENTSCOLLECTORTYPE = _descriptor.EnumDescriptor(
+  name='EventsCollectorType',
+  full_name='poplar.CreateOptions.EventsCollectorType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UNKNOWN_COLLECTOR', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BASIC', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PASSTHROUGH', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SAMPLING_100', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SAMPLING_1K', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SAMPLING_10K', index=5, number=5,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SAMPLING_100K', index=6, number=6,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RAND_SAMPLING_50', index=7, number=7,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RAND_SAMPLING_25', index=8, number=8,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RAND_SAMPLING_10', index=9, number=9,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='INTERVAL_100MS', index=10, number=10,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='INTERVAL_1S', index=11, number=11,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=467,
+  serialized_end=714,
+)
+_sym_db.RegisterEnumDescriptor(_CREATEOPTIONS_EVENTSCOLLECTORTYPE)
 
 
 _POPLARID = _descriptor.Descriptor(
@@ -105,8 +164,8 @@ _POPLARID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=89,
-  serialized_end=113,
+  serialized_start=24,
+  serialized_end=48,
 )
 
 
@@ -159,12 +218,27 @@ _CREATEOPTIONS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='events', full_name='poplar.CreateOptions.events', index=6,
+      number=7, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='buffered', full_name='poplar.CreateOptions.buffered', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
     _CREATEOPTIONS_RECORDERTYPE,
+    _CREATEOPTIONS_EVENTSCOLLECTORTYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -172,8 +246,8 @@ _CREATEOPTIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=116,
-  serialized_end=443,
+  serialized_start=51,
+  serialized_end=714,
 )
 
 
@@ -210,12 +284,14 @@ _POPLARRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=445,
-  serialized_end=491,
+  serialized_start=716,
+  serialized_end=762,
 )
 
 _CREATEOPTIONS.fields_by_name['recorder'].enum_type = _CREATEOPTIONS_RECORDERTYPE
+_CREATEOPTIONS.fields_by_name['events'].enum_type = _CREATEOPTIONS_EVENTSCOLLECTORTYPE
 _CREATEOPTIONS_RECORDERTYPE.containing_type = _CREATEOPTIONS
+_CREATEOPTIONS_EVENTSCOLLECTORTYPE.containing_type = _CREATEOPTIONS
 DESCRIPTOR.message_types_by_name['PoplarID'] = _POPLARID
 DESCRIPTOR.message_types_by_name['CreateOptions'] = _CREATEOPTIONS
 DESCRIPTOR.message_types_by_name['PoplarResponse'] = _POPLARRESPONSE
