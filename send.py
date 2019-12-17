@@ -16,7 +16,7 @@ Event = collections.namedtuple('Event', ['TotalSeconds', 'TotalNanos', 'Seconds'
 
 NAME = "InsertRemove.Insert"
 THREADS = 100
-HOW_MANY_EVENTS = 100 * 1000
+HOW_MANY_EVENTS = int(100 * 1000 / THREADS)
 ALL_FIELDS = True
 
 
@@ -30,6 +30,7 @@ def create_collector():
     options.chunkSize = 10000
     options.streaming = True
     options.dynamic = False
+    options.recorder = poplar.CreateOptions.RecorderType.PERF
     options.events = poplar.CreateOptions.EventsCollectorType.BASIC
 
     try:
